@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Up – QuizApp</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="quiz.css">
+  <script src="common.js"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 to-pink-100 min-h-screen flex flex-col" data-public="true">
+  <div id="header-include"></div>
+
+  <main class="flex-1 flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white/80 backdrop-blur rounded-xl shadow p-6">
+      <h1 class="text-2xl font-semibold mb-4 text-center">Sign Up</h1>
+      <form id="signupForm" class="space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium mb-1">First name</label>
+            <input id="first_name" type="text" class="w-full border rounded px-3 py-2" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Last name</label>
+            <input id="last_name" type="text" class="w-full border rounded px-3 py-2" required>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Email</label>
+          <input id="reg_email" type="email" class="w-full border rounded px-3 py-2" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Password</label>
+          <input id="reg_password" type="password" class="w-full border rounded px-3 py-2" minlength="6" required>
+          <p class="text-xs text-gray-500 mt-1">At least 6 characters.</p>
+        </div>
+        <button id="signupBtn" type="submit" class="w-full py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">Sign up</button>
+        <p class="text-sm text-center mt-2">
+          Already have an account? <a class="text-indigo-700 hover:underline" href="login.html">Login now</a>
+        </p>
+        <p id="message" class="text-sm text-red-600 mt-2 text-center"></p>
+      </form>
+    </div>
+  </main>
+
+  <div id="footer-include"></div>
+
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const firstName = document.getElementById('first_name').value.trim();
+      const lastName  = document.getElementById('last_name').value.trim();
+      const email     = document.getElementById('reg_email').value.trim();
+      const password  = document.getElementById('reg_password').value;
+      const msg = document.getElementById('message');
+      const btn = document.getElementById('signupBtn');
+      msg.textContent = '';
+
+      if (!firstName || !lastName || !email || !password) {
+        msg.textContent = 'Please fill in every field.';
+        return;
+      }
+      if (password.length < 6) {
+        msg.textContent = 'Password must be at least 6 characters.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Signing up...';
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: `${firstName} ${lastName}`.trim(), email, password })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.token) {
+          msg.textContent = data.error || 'Registration failed';
+          return;
+        }
+        // Auto-login: store the token returned by /register and go straight to Topics
+        localStorage.setItem('token', data.token);
+        window.location.href = 'topics.html';
+      } catch {
+        msg.textContent = 'Server error. Please try again.';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Sign up';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz – QuizApp</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="quiz.css">
+</head>
+<body class="flex flex-col min-h-screen bg-gray-50" id="body">
+  <div id="header-include"></div>
+  <main class="flex-1 flex items-center justify-center p-6">
+    <div id="quiz-container" class="w-full max-w-lg"></div>
+  </main>
+  <div id="footer-include"></div>
+  <script src="common.js"></script>
+  <script>
+  // Shuffle helper
+  function shuffle(array) {
+    let arr = array.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  (async function(){
+    const Qc = document.getElementById('quiz-container');
+    const p = new URLSearchParams(location.search);
+    const topic = p.get('topic'), sub = p.get('subtopic'), set = p.get('set');
+    if(!topic||!sub||!set){
+      Qc.innerHTML = `<p class="text-center text-red-600">Missing URL params</p>`;
+      return;
+    }
+    const path = `quizzes/${topic}/${sub}/${set}.json`;
+    let questions;
+    try {
+      const r = await fetch(path);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json();
+      questions = Array.isArray(data) ? data : data.questions || [];
+      if (!questions.length) throw new Error('No questions found');
+    } catch(e){
+      Qc.innerHTML = `<p class="text-center text-red-600">Could not load <code>${path}</code><br>${e.message}</p>`;
+      return;
+    }
+
+    // Shuffle questions and their options
+    questions = shuffle(questions).map(q => ({
+      ...q,
+      options: shuffle(q.options)
+    }));
+
+    let idx=0, ans=new Array(questions.length).fill(null);
+    let timer = 0, timerInterval;
+    let finished = false;
+
+    function startTimer() {
+      timer = 0;
+      timerInterval = setInterval(() => {
+        timer++;
+        document.getElementById('timer').textContent = `⏰ ${formatTime(timer)}`;
+      }, 1000);
+    }
+    function stopTimer() { clearInterval(timerInterval); }
+    function formatTime(s) {
+      return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    }
+
+    function render() {
+      if (finished) return;
+
+      const q = questions[idx];
+      // Progress percent
+      const progress = Math.round(((idx) / questions.length) * 100);
+
+      Qc.innerHTML = `
+      <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md mx-auto animate-fadein">
+        <!-- Progress Bar & Timer -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-3/4 bg-gray-200 rounded-full h-2 mr-4">
+            <div class="bg-indigo-600 h-2 rounded-full" style="width:${progress}%"></div>
+          </div>
+          <span id="timer" class="text-xs font-mono"></span>
+        </div>
+        <!-- Question Jump Dots -->
+        <div class="flex justify-center space-x-2 mb-3">
+          ${questions.map((_,i)=>`
+            <button class="w-5 h-5 rounded-full border-2 ${i===idx?'border-indigo-600 bg-indigo-600':'border-gray-300 bg-gray-200'}"
+              title="Go to Q${i+1}" style="outline:none;" onclick="window._goQ(${i})"></button>
+          `).join('')}
+        </div>
+        <h2 class="text-lg font-bold mb-2">Question ${idx+1} of ${questions.length}</h2>
+        <p class="mb-4">${q.question}</p>
+        <ul class="space-y-3 mb-6">
+          ${q.options.map((o,i)=>`
+            <li>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="opt" value="${i}"
+                  ${ans[idx]===i?'checked':''}
+                  class="form-radio text-indigo-600"/>
+                <span>${o}</span>
+              </label>
+            </li>
+          `).join('')}
+        </ul>
+        <div class="flex justify-between items-center">
+          <button ${idx===0?'disabled class="opacity-50"':''} id="prevBtn">← Previous</button>
+          <button id="nextBtn" class="bg-indigo-600 text-white px-5 py-2 rounded-xl">
+            ${idx===questions.length-1?'Finish':'Next →'}
+          </button>
+        </div>
+      </div>
+      <style>
+        .animate-fadein { animation: fadein 0.5s; }
+        @keyframes fadein { from{opacity:0} to{opacity:1} }
+      </style>
+      `;
+
+      // Handle question jump dots
+      window._goQ = (n) => { idx=n; render(); };
+
+      document.querySelectorAll('input[name="opt"]').forEach(r=>{
+        r.onchange = e=>{
+          ans[idx]=+e.target.value;
+        };
+      });
+      document.getElementById('prevBtn').onclick = ()=>{ if(idx>0){ idx--; render(); }};
+      document.getElementById('nextBtn').onclick = ()=>{
+        if(idx<questions.length-1){ idx++; render(); }
+        else finishQuiz();
+      };
+    }
+
+    function finishQuiz() {
+      finished = true;
+      stopTimer();
+      // Score breakdown
+      const score = questions.reduce((s,_,i)=> s + (ans[i]===questions[i].answer ? 1:0),0);
+
+      // Save the attempt to the backend (best-effort — quiz still shows
+      // the result even if the user is logged out or the save fails).
+      fetch(`${API_BASE}/api/quiz/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ score, total: questions.length, topic, subtopic: sub, set })
+      }).catch(() => {});
+      try { localStorage.setItem('last', `${score}/${questions.length}`); } catch {}
+
+      Qc.innerHTML = `
+        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md mx-auto text-center animate-fadein">
+          <h2 class="text-3xl font-bold mb-4">Your Score</h2>
+          <p class="text-2xl mb-2">${score} / ${questions.length}</p>
+          <div class="mb-6 text-xs text-gray-500">Time: ${formatTime(timer)}</div>
+          <button onclick="location.href='quiz.html?topic=${topic}&subtopic=${sub}&set=${set}'"
+            class="bg-gray-200 text-gray-800 px-4 py-2 rounded-xl mr-2 hover:bg-gray-300">
+            Retake Quiz
+          </button>
+          <button onclick="location.href='sets.html?topic=${topic}&subtopic=${sub}'"
+            class="bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700">
+            Back to Sets
+          </button>
+          <h3 class="text-xl font-bold mt-8 mb-4">Review</h3>
+          <div class="overflow-auto max-h-72">
+          <table class="w-full text-left text-xs border">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="px-2 py-1">#</th>
+                <th class="px-2 py-1">Question</th>
+                <th class="px-2 py-1">Your Answer</th>
+                <th class="px-2 py-1">Correct</th>
+                <th class="px-2 py-1">Explanation</th>
+              </tr>
+            </thead>
+            <tbody>
+            ${questions.map((q,i)=>`
+              <tr class="${ans[i]===q.answer?'bg-green-50':'bg-red-50'}">
+                <td class="px-2 py-1 font-bold">${i+1}</td>
+                <td class="px-2 py-1">${q.question}</td>
+                <td class="px-2 py-1">${q.options[ans[i]] || '<i>Skipped</i>'}</td>
+                <td class="px-2 py-1">${q.options[q.answer]}</td>
+                <td class="px-2 py-1">${q.explanation || ''}</td>
+              </tr>
+            `).join('')}
+            </tbody>
+          </table>
+          </div>
+        </div>
+        <style>
+          .animate-fadein { animation: fadein 0.5s; }
+          @keyframes fadein { from{opacity:0} to{opacity:1} }
+        </style>
+      `;
+    }
+
+    startTimer();
+    render();
+  })();
+  </script>
+</body>
+</html>

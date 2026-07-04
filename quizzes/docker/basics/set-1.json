@@ -1,0 +1,57 @@
+[
+  {
+    "question": "What is Docker primarily used for?",
+    "options": [
+      "Managing databases",
+      "Containerizing applications",
+      "Building desktop GUIs",
+      "Monitoring network traffic"
+    ],
+    "answer": 1,
+    "explanation": "Docker packages an application with its dependencies into a portable container."
+  },
+  {
+    "question": "Which of these commands lists all running Docker containers?",
+    "options": [
+      "docker ps",
+      "docker ls",
+      "docker images",
+      "docker run"
+    ],
+    "answer": 0,
+    "explanation": "docker ps lists running containers; add -a to include stopped ones."
+  },
+  {
+    "question": "What file do you use to define a multi-step Docker build?",
+    "options": [
+      "Dockerfile",
+      "docker-compose.yml",
+      "build.json",
+      "container.json"
+    ],
+    "answer": 0,
+    "explanation": "A Dockerfile defines the steps to build a Docker image."
+  },
+  {
+    "question": "Which command builds an image from a Dockerfile in the current directory?",
+    "options": [
+      "docker create",
+      "docker build .",
+      "docker run .",
+      "docker make"
+    ],
+    "answer": 1,
+    "explanation": "docker build . builds an image using the Dockerfile in the current directory."
+  },
+  {
+    "question": "What does the `-d` flag do when used with `docker run`?",
+    "options": [
+      "Deletes the container after exit",
+      "Runs the container in detached (background) mode",
+      "Uses the default network",
+      "Downloads the image fresh from registry"
+    ],
+    "answer": 1,
+    "explanation": "The -d flag runs the container in the background (detached mode)."
+  }
+]

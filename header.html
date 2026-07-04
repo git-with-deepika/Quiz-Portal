@@ -1,0 +1,25 @@
+<!-- header.html -->
+<header class="w-full bg-white shadow-sm">
+  <div class="max-w-6xl mx-auto flex items-center justify-between p-4">
+    <a class="text-xl font-semibold" href="index.html">QuizApp</a>
+
+    <nav class="flex items-center gap-4">
+      <a href="topics.html" class="hover:underline">Topics</a>
+      <a href="profile.html" class="hover:underline">Profile</a>
+      <a href="admin.html" class="hover:underline">Admin</a>
+
+      <span id="auth-badge" class="text-sm text-gray-500"></span>
+
+      <div class="relative">
+        <button id="user-menu-button" class="border rounded px-3 py-1">Menu</button>
+        <div id="user-menu" class="absolute right-0 mt-2 w-40 bg-white border rounded shadow hidden">
+          <a class="block px-4 py-2 hover:bg-gray-100" href="settings.html">Settings</a>
+          <a class="block px-4 py-2 hover:bg-gray-100" href="about.html">About</a>
+          <a class="block px-4 py-2 hover:bg-gray-100" href="contact.html">Contact</a>
+          <a class="block px-4 py-2 hover:bg-gray-100" href="settings.html">Settings</a>
+          <a class="block px-4 py-2 hover:bg-gray-100" id="logout-link" href="#">Logout</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>

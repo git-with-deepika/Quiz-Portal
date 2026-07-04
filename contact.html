@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Contact Us – QuizApp</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="quiz.css">
+</head>
+<body class="bg-gradient-to-br from-indigo-100 to-pink-100 min-h-screen flex flex-col" data-public="true">
+  <!-- Shared Header -->
+  <div id="header-include"></div>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-screen mx-auto px-8 py-16">
+    <h1 class="font-montserrat text-4xl font-extrabold mb-6">Contact Us</h1>
+    <form onsubmit="sendMessage(); return false;" class="space-y-6 max-w-lg">
+      <div>
+        <label for="name" class="block text-gray-700 mb-1">Name</label>
+        <input id="name" type="text" required
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-indigo-200 focus:ring-2 outline-none transition"/>
+      </div>
+      <div>
+        <label for="email" class="block text-gray-700 mb-1">Email</label>
+        <input id="email" type="email" required
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-indigo-200 focus:ring-2 outline-none transition"/>
+      </div>
+      <div>
+        <label for="message" class="block text-gray-700 mb-1">Message</label>
+        <textarea id="message" rows="5" required
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-indigo-200 focus:ring-2 outline-none transition"></textarea>
+      </div>
+      <button type="submit" class="btn-primary">Send Message</button>
+      <p id="contact-feedback" class="text-green-600 mt-2"></p>
+    </form>
+  </main>
+
+  <!-- Shared Footer -->
+  <div id="footer-include"></div>
+
+  <!-- Shared header/footer + theme toggle -->
+  <script src="common.js"></script>
+  <script>
+    async function sendMessage() {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const message = document.getElementById('message').value.trim();
+      const feedback = document.getElementById('contact-feedback');
+      feedback.textContent = '';
+      feedback.className = 'mt-2';
+
+      if (!name || !email || !message) {
+        feedback.textContent = 'Please fill in every field.';
+        feedback.className = 'text-red-600 mt-2';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/contact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, message })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          feedback.textContent = data.error || 'Could not send your message.';
+          feedback.className = 'text-red-600 mt-2';
+          return;
+        }
+        feedback.textContent = data.message || "Thanks! We've received your message and will be in touch.";
+        feedback.className = 'text-green-600 mt-2';
+        document.getElementById('name').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('message').value = '';
+      } catch {
+        feedback.textContent = 'Server error. Please try again later.';
+        feedback.className = 'text-red-600 mt-2';
+      }
+    }
+  </script>
+</body>
+</html>

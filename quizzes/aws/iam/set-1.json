@@ -1,0 +1,37 @@
+[
+  {
+    "question": "What does IAM stand for in AWS?",
+    "options": ["Identity and Access Management", "Internet Access Manager", "Instance Access Module", "Integrated Account Manager"],
+    "answer": 0,
+    "explanation": "IAM stands for Identity and Access Management — it controls who can do what in your AWS account."
+  },
+  {
+    "question": "What is the security best practice regarding the AWS root account?",
+    "options": [
+      "Use it for all daily tasks",
+      "Share its credentials with the whole team",
+      "Avoid daily use and enable MFA on it",
+      "Delete it after account creation"
+    ],
+    "answer": 2,
+    "explanation": "AWS recommends locking down the root account with MFA and using IAM users/roles for everyday work instead."
+  },
+  {
+    "question": "Which IAM entity is meant to be assumed temporarily, e.g. by an EC2 instance or another AWS service?",
+    "options": ["IAM User", "IAM Group", "IAM Role", "IAM Policy"],
+    "answer": 2,
+    "explanation": "IAM Roles provide temporary credentials and are assumed by users, services, or applications."
+  },
+  {
+    "question": "What is attached to IAM users/groups/roles to actually grant permissions?",
+    "options": ["A policy", "A bucket", "A VPC", "A key pair"],
+    "answer": 0,
+    "explanation": "IAM policies (JSON documents) define the permissions that get attached to users, groups, or roles."
+  },
+  {
+    "question": "By default, when a new IAM user is created, what level of access do they have?",
+    "options": ["Full administrator access", "Read-only access to everything", "No permissions at all", "Access only to S3"],
+    "answer": 2,
+    "explanation": "New IAM users start with zero permissions until you explicitly attach policies."
+  }
+]

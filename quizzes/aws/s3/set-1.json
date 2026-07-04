@@ -1,0 +1,32 @@
+[
+  {
+    "question": "What does S3 stand for in AWS?",
+    "options": ["Simple Storage Service", "Secure Server Storage", "Scalable Storage System", "Simple Server Service"],
+    "answer": 0,
+    "explanation": "S3 stands for Simple Storage Service — AWS's object storage service."
+  },
+  {
+    "question": "What is the basic unit of storage in S3 called?",
+    "options": ["Block", "Object", "Volume", "Partition"],
+    "answer": 1,
+    "explanation": "S3 stores data as objects (file + metadata) inside buckets, not as blocks or volumes."
+  },
+  {
+    "question": "Which S3 storage class is cheapest for rarely-accessed data that still needs millisecond retrieval?",
+    "options": ["S3 Standard", "S3 Standard-IA", "S3 Glacier Deep Archive", "S3 Intelligent-Tiering"],
+    "answer": 1,
+    "explanation": "S3 Standard-IA (Infrequent Access) is cheaper than Standard for data you don't access often, with the same fast retrieval."
+  },
+  {
+    "question": "Are S3 bucket names globally unique?",
+    "options": ["Yes, across all AWS accounts", "No, only unique per account", "Only unique per region", "Only unique per IAM user"],
+    "answer": 0,
+    "explanation": "S3 bucket names must be globally unique across every AWS account, not just your own."
+  },
+  {
+    "question": "What feature keeps multiple versions of the same object in a bucket?",
+    "options": ["Lifecycle policy", "Versioning", "Replication", "Encryption"],
+    "answer": 1,
+    "explanation": "Enabling Versioning preserves every version of an object, protecting against accidental overwrite/delete."
+  }
+]

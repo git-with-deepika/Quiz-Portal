@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sets – QuizApp</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="quiz.css">
+</head>
+<body class="flex flex-col min-h-screen bg-gray-50">
+  <div id="header-include"></div>
+  <main class="flex-1 max-w-3xl mx-auto px-6 py-12 space-y-6">
+    <h2 id="title" class="text-3xl font-bold text-gray-800 text-center"></h2>
+    <div id="list" class="space-y-4"></div>
+    <div class="text-center">
+      <button onclick="history.back()" class="text-indigo-600">← Back to Sub-Topics</button>
+    </div>
+  </main>
+  <div id="footer-include"></div>
+  <script src="common.js"></script>
+  <script>
+  (async()=>{
+    const p = new URLSearchParams(location.search);
+    const topic = p.get('topic'), sub = p.get('subtopic');
+    document.getElementById('title').textContent = `${topic.toUpperCase()} / ${sub.toUpperCase()} Sets`;
+    try {
+      let topicDoc = await fetch(`${API_BASE}/api/quiz/topics/${topic}`).then(r=>r.json());
+      let subobj = topicDoc.subtopics.find(s=>s.slug===sub);
+      if(!subobj) throw new Error('Subtopic not found');
+      const out = document.getElementById('list');
+      subobj.sets.forEach(s=>{
+        let row = document.createElement('div');
+        row.className = 'bg-white p-6 rounded-2xl shadow flex justify-between items-center';
+        row.innerHTML = `
+          <span class="text-lg font-medium">${s.name}</span>
+          <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg"
+                  onclick="location.href='quiz.html?topic=${topic}&subtopic=${sub}&set=${s.slug}'">
+            Start
+          </button>`;
+        out.appendChild(row);
+      });
+      if(!subobj.sets.length)
+        out.innerHTML = `<p class="text-center text-gray-600">No sets available</p>`;
+    } catch(e){
+      document.getElementById('list').innerHTML = `<p class="text-center text-red-600">${e.message}</p>`;
+    }
+  })();
+  </script>
+</body>
+</html>

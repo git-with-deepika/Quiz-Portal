@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>QuizApp Admin</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="common.js"></script>
+  <style>body { font-family: sans-serif }</style>
+</head>
+<body class="p-6" data-role="admin">
+  <div id="header-include"></div>
+
+  <h1 class="text-2xl font-bold mb-4">Admin Dashboard</h1>
+  <div id="topics" class="space-y-4 mb-8"></div>
+  <hr/>
+  <section class="mt-4">
+    <h2 class="text-xl font-semibold mb-2">Create Topic</h2>
+    <form id="createForm" class="flex gap-2 flex-wrap">
+      <input id="name" placeholder="Topic name" class="border rounded px-2 py-1">
+      <input id="slug" placeholder="slug" class="border rounded px-2 py-1">
+      <input id="icon" placeholder="Icon URL (optional)" class="border rounded px-2 py-1">
+      <button class="px-3 py-1 rounded bg-indigo-600 text-white">Create</button>
+    </form>
+    <p id="msg" class="text-sm mt-2"></p>
+  </section>
+
+  <div id="footer-include"></div>
+
+  <script>
+    const ADMIN_API = `${API_BASE}/api/admin`;
+
+    async function loadTopics() {
+      const el = document.getElementById('topics');
+      const res = await fetch(`${ADMIN_API}/topics`);
+      if (!res.ok) {
+        el.innerHTML = res.status === 403
+          ? '<p class="text-red-600">You need an admin account to view this page.</p>'
+          : '<p class="text-red-600">Failed to load topics.</p>';
+        return;
+      }
+      const data = await res.json();
+      el.innerHTML = '<h2 class="text-xl font-semibold mb-2">Topics</h2>' + data.map(t => `
+        <div class="border rounded p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              ${t.iconUrl ? `<img src="${t.iconUrl}" class="w-5 h-5"/>` : ''}
+              <strong>${t.name}</strong> <span class="text-gray-500">(${t.slug})</span>
+            </div>
+            <div class="space-x-2">
+              <button data-slug="${t.slug}" class="add-sub px-2 py-1 rounded bg-blue-600 text-white text-sm">+ Subtopic</button>
+              <button data-slug="${t.slug}" class="del-topic px-2 py-1 rounded bg-red-600 text-white text-sm">Delete Topic</button>
+            </div>
+          </div>
+          <div class="ml-6 space-y-1">
+            ${(t.subtopics || []).map(s => `
+              <div class="bg-gray-50 rounded p-2">
+                <div class="flex items-center justify-between">
+                  <span><strong>${s.name}</strong> <span class="text-gray-500 text-sm">(${s.slug})</span></span>
+                  <div class="space-x-2">
+                    <button data-topic="${t.slug}" data-sub="${s.slug}" class="add-set px-2 py-0.5 rounded bg-indigo-500 text-white text-xs">+ Set</button>
+                    <button data-topic="${t.slug}" data-sub="${s.slug}" class="del-sub px-2 py-0.5 rounded bg-red-500 text-white text-xs">Delete Subtopic</button>
+                  </div>
+                </div>
+                <div class="ml-6 mt-1 space-y-1">
+                  ${(s.sets || []).map(set => `
+                    <div class="flex items-center justify-between text-sm bg-white rounded px-2 py-1">
+                      <span>${set.name} <span class="text-gray-400">(${set.slug})</span></span>
+                      <button data-topic="${t.slug}" data-sub="${s.slug}" data-set="${set.slug}" class="del-set px-2 py-0.5 rounded bg-red-400 text-white text-xs">Delete Set</button>
+                    </div>
+                  `).join('') || '<p class="text-xs text-gray-400">No sets yet</p>'}
+                </div>
+              </div>
+            `).join('') || '<p class="text-xs text-gray-400">No subtopics yet</p>'}
+          </div>
+        </div>
+      `).join('');
+
+      attachHandlers();
+    }
+
+    function attachHandlers() {
+      document.querySelectorAll('.add-sub').forEach(btn => btn.onclick = async () => {
+        const topic = btn.dataset.slug;
+        const name = prompt('Subtopic name?'); if (!name) return;
+        const slug = prompt('Subtopic slug?'); if (!slug) return;
+        await fetch(`${ADMIN_API}/topics/${topic}/subtopics`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, slug })
+        });
+        loadTopics();
+      });
+
+      document.querySelectorAll('.add-set').forEach(btn => btn.onclick = async () => {
+        const { topic, sub } = btn.dataset;
+        const name = prompt('Set name?'); if (!name) return;
+        const slug = prompt('Set slug? (must match the quiz JSON filename, e.g. "set-1")'); if (!slug) return;
+        await fetch(`${ADMIN_API}/topics/${topic}/subtopics/${sub}/sets`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, slug })
+        });
+        loadTopics();
+      });
+
+      document.querySelectorAll('.del-topic').forEach(btn => btn.onclick = async () => {
+        if (!confirm('Delete this topic and everything under it?')) return;
+        await fetch(`${ADMIN_API}/topics/${btn.dataset.slug}`, { method: 'DELETE' });
+        loadTopics();
+      });
+
+      document.querySelectorAll('.del-sub').forEach(btn => btn.onclick = async () => {
+        if (!confirm('Delete this subtopic and its sets?')) return;
+        const { topic, sub } = btn.dataset;
+        await fetch(`${ADMIN_API}/topics/${topic}/subtopics/${sub}`, { method: 'DELETE' });
+        loadTopics();
+      });
+
+      document.querySelectorAll('.del-set').forEach(btn => btn.onclick = async () => {
+        if (!confirm('Delete this set?')) return;
+        const { topic, sub, set } = btn.dataset;
+        await fetch(`${ADMIN_API}/topics/${topic}/subtopics/${sub}/sets/${set}`, { method: 'DELETE' });
+        loadTopics();
+      });
+    }
+
+    document.getElementById('createForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const slug = document.getElementById('slug').value.trim();
+      const iconUrl = document.getElementById('icon').value.trim();
+      const msg = document.getElementById('msg');
+      msg.textContent = '';
+      if (!name || !slug) { msg.textContent = 'Name and slug are required'; return; }
+      const res = await fetch(`${ADMIN_API}/topics`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, slug, iconUrl })
+      });
+      if (res.ok) { msg.textContent = 'Created'; document.getElementById('createForm').reset(); loadTopics(); }
+      else { const d = await res.json().catch(() => ({})); msg.textContent = d.error || 'Failed'; }
+    });
+
+    loadTopics();
+  </script>
+</body>
+</html>

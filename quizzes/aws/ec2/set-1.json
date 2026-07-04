@@ -1,0 +1,57 @@
+[
+  {
+    "question": "What does EC2 stand for in AWS?",
+    "options": [
+      "Elastic Compute Cloud",
+      "Elastic Cloud Compute",
+      "External Compute Cloud",
+      "Elastic Computing Core"
+    ],
+    "answer": 0,
+    "explanation": "EC2 stands for Elastic Compute Cloud — AWS's resizable virtual server service."
+  },
+  {
+    "question": "Which type of IP address can change when an instance is restarted?",
+    "options": [
+      "Elastic IP",
+      "Static IP",
+      "Public IP",
+      "Private IP"
+    ],
+    "answer": 2,
+    "explanation": "A standard public IP is released when the instance stops and a new one is assigned on restart, unless you use an Elastic IP."
+  },
+  {
+    "question": "Which EC2 pricing model lets you bid for spare capacity at a discount?",
+    "options": [
+      "On-Demand",
+      "Reserved Instance",
+      "Spot Instance",
+      "Dedicated Host"
+    ],
+    "answer": 2,
+    "explanation": "Spot Instances use spare AWS capacity at up to 90% discount, but can be reclaimed by AWS with short notice."
+  },
+  {
+    "question": "What is an AMI in EC2?",
+    "options": [
+      "A monitoring dashboard",
+      "A pre-configured template used to launch instances",
+      "A billing alert",
+      "A type of load balancer"
+    ],
+    "answer": 1,
+    "explanation": "An Amazon Machine Image (AMI) packages the OS and software needed to launch an EC2 instance."
+  },
+  {
+    "question": "Which EC2 component controls inbound/outbound traffic at the instance level?",
+    "options": [
+      "Network ACL",
+      "Security Group",
+      "Route Table",
+      "Internet Gateway"
+    ],
+    "answer": 1,
+    "explanation": "Security Groups act as a virtual firewall at the instance level, while Network ACLs operate at the subnet level."
+  }
+]

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Result</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="https://cdn.tailwindcss.com"></script><link rel="stylesheet" href="quiz.css">
+</head><body>
+  <div id="header-include"></div>
+  <main class="max-screen px-8 py-12 flex items-center justify-center">
+    <div class="bg-white rounded-lg p-10 shadow-lg text-center space-y-6">
+      <p class="text-4xl font-bold text-indigo-600" id="scr"></p>
+      <p id="msg" class="text-lg"></p>
+      <button onclick="location.href='index.html'" class="btn-primary">Back Home</button>
+    </div>
+  </main>
+  <div id="footer-include"></div><script src="common.js"></script>
+  <script>
+    const v=localStorage.getItem('last')||'0/0';
+    document.getElementById('scr').textContent=v;
+    document.getElementById('msg').textContent='Great job!';
+  </script>
+</body></html>

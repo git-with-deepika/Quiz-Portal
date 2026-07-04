@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile – QuizApp</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="quiz.css">
+  <script src="common.js"></script>
+</head>
+<body>
+  <div id="header-include"></div>
+
+  <main class="max-w-2xl mx-auto p-4 space-y-8">
+    <section>
+      <h1 class="text-2xl font-semibold mb-4">Profile</h1>
+      <div id="me" class="bg-white border rounded p-4 text-sm"></div>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold mb-3">Quiz History</h2>
+      <div id="history" class="bg-white border rounded overflow-hidden">
+        <p class="p-4 text-gray-500 text-sm">Loading…</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer-include"></div>
+
+  <script>
+    (async () => {
+      const meEl = document.getElementById('me');
+      const historyEl = document.getElementById('history');
+
+      // --- Account info ---
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/me`);
+        const data = await res.json();
+        if (!res.ok || !data.authenticated) {
+          meEl.innerHTML = '<p class="text-red-600">Not authenticated.</p>';
+        } else {
+          const u = data.user || {};
+          meEl.innerHTML = `
+            <p><span class="font-medium">Name:</span> ${u.name || '-'}</p>
+            <p><span class="font-medium">Email:</span> ${u.email || '-'}</p>
+            <p><span class="font-medium">Role:</span> ${u.role || 'user'}</p>
+            <p class="mt-2"><a class="text-indigo-700 underline" href="settings.html">Change password / settings →</a></p>
+          `;
+        }
+      } catch {
+        meEl.innerHTML = '<p class="text-red-600">Could not load profile.</p>';
+      }
+
+      // --- Quiz history ---
+      try {
+        const res = await fetch(`${API_BASE}/api/quiz/results`);
+        if (!res.ok) throw new Error('Failed to load history');
+        const results = await res.json();
+
+        if (!results.length) {
+          historyEl.innerHTML = '<p class="p-4 text-gray-500 text-sm">No quizzes taken yet — head to <a class="text-indigo-700 underline" href="topics.html">Topics</a> to get started!</p>';
+          return;
+        }
+
+        historyEl.innerHTML = `
+          <table class="w-full text-sm text-left">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-3 py-2">Date</th>
+                <th class="px-3 py-2">Topic</th>
+                <th class="px-3 py-2">Sub-topic</th>
+                <th class="px-3 py-2">Set</th>
+                <th class="px-3 py-2">Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${results.map(r => `
+                <tr class="border-t">
+                  <td class="px-3 py-2">${new Date(r.timestamp).toLocaleString()}</td>
+                  <td class="px-3 py-2">${r.topic || '-'}</td>
+                  <td class="px-3 py-2">${r.subtopic || '-'}</td>
+                  <td class="px-3 py-2">${r.set || '-'}</td>
+                  <td class="px-3 py-2 font-medium">${r.score} / ${r.total}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } catch (e) {
+        historyEl.innerHTML = `<p class="p-4 text-red-600 text-sm">${e.message}</p>`;
+      }
+    })();
+  </script>
+</body>
+</html>

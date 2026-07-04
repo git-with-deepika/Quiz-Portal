@@ -1,0 +1,37 @@
+[
+  {
+    "question": "What is EC2 primarily used for in AWS?",
+    "options": ["Object storage", "Virtual compute capacity", "Managed relational databases", "DNS routing"],
+    "answer": 1,
+    "explanation": "EC2 provides resizable virtual machines (compute capacity) in the cloud."
+  },
+  {
+    "question": "Which EC2 pricing model is generally the cheapest for fault-tolerant, flexible workloads?",
+    "options": ["On-Demand", "Reserved", "Spot", "Dedicated"],
+    "answer": 2,
+    "explanation": "Spot Instances are the cheapest option, ideal for workloads that can tolerate interruption."
+  },
+  {
+    "question": "Which storage is directly attached to the host and lost when the instance stops?",
+    "options": ["EBS volume", "S3 bucket", "Instance Store", "EFS"],
+    "answer": 2,
+    "explanation": "Instance Store volumes are ephemeral — their data is lost on stop/terminate, unlike EBS."
+  },
+  {
+    "question": "What does an Auto Scaling Group do?",
+    "options": [
+      "Encrypts EBS volumes automatically",
+      "Automatically adds/removes EC2 instances based on demand",
+      "Backs up instances to S3",
+      "Manages IAM permissions"
+    ],
+    "answer": 1,
+    "explanation": "Auto Scaling Groups maintain instance count and scale it up or down based on policies/demand."
+  },
+  {
+    "question": "Which EC2 purchasing option guarantees capacity for a 1 or 3 year term at a discount?",
+    "options": ["Spot Instance", "On-Demand Instance", "Reserved Instance", "Savings Plan only"],
+    "answer": 2,
+    "explanation": "Reserved Instances offer a significant discount in exchange for a 1 or 3 year commitment."
+  }
+]
