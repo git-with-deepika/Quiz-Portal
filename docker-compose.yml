@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: quiz-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env
+    networks:
+      - quiz-net
+
+  frontend:
+    build:
+      context: .
+    container_name: quiz-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - API_BASE=http://localhost:3000
+    depends_on:
+      - backend
+    networks:
+      - quiz-net
+
+networks:
+  quiz-net:
+    driver: bridge
