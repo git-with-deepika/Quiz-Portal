@@ -2,7 +2,7 @@
 
 // ====== CONFIG ======
 // Use a global so pages can read it without redefining.
-window.API_BASE = 'http://localhost:3000'; // your EC2 backend
+window.API_BASE = ''; // your EC2 backend
 
 
 // ====== HEADER/FOOTER INJECT & GLOBAL GUARD ======
